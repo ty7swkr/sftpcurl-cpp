@@ -1,20 +1,20 @@
 # sftpcurl-cpp
 
-libcurl기반의 간단한 C++ SFTP 라이브러리
+libcurl 기반의 간단한 C++ SFTP 라이브러리
 
 - libcurl-7.61.1 이상
 - C++11 이상
 - header only
 
-## 사용법
-
-```cpp
-#include <sftp_curl/sftp_curl.h>
-```
+## 예제
 
 ### 파일 업/다운로드
 
 ```cpp
+#include <sftp_curl/sftp_curl.h>
+
+...........
+
 try
 {
   SFTPUploader uploader;
@@ -31,6 +31,10 @@ catch (const SFTPCurlBase::exception &e)
 ```
 
 ```cpp
+#include <sftp_curl/sftp_curl.h>
+
+...........
+
 try
 {
   SFTPDownloader downloader;
@@ -51,6 +55,10 @@ catch (const SFTPCurlBase::exception &e)
 파일 경로 대신 콜백 함수로 데이터를 직접 처리.
 
 ```cpp
+#include <sftp_curl/sftp_curl.h>
+
+...........
+
 // 업로드: target 버퍼에 데이터를 채워 반환, 0 반환 시 전송 완료
 try
 {
@@ -60,6 +68,7 @@ try
           .url("sftp://server.com/remote/path/file.txt")
           .upload([&](void *target, size_t target_size) -> size_t
           {
+            // 이 람다 함수는 perform()시의 스레드에서 실행됨.
             size_t remain  = data.size() - offset;
             size_t to_copy = remain < target_size ? remain : target_size;
             memcpy(target, data.data() + offset, to_copy);
@@ -77,6 +86,10 @@ catch (const SFTPCurlBase::exception &e)
 ### 스트림 다운로드
 
 ```cpp
+#include <sftp_curl/sftp_curl.h>
+
+...........
+
 // 다운로드: 수신 데이터를 메모리에 누적
 try
 {
@@ -85,6 +98,7 @@ try
             .url("sftp://server.com/remote/path/file.txt")
             .download([&](void *data, size_t data_size) -> size_t
             {
+              // 이 람다 함수는 perform()시의 스레드에서 실행됨.
               result.append(static_cast<char *>(data), data_size);
               return data_size;
             })
@@ -99,17 +113,20 @@ catch (const SFTPCurlBase::exception &e)
 ### 파일 목록
 
 ```cpp
+#include <sftp_curl/sftp_curl.h>
+
+...........
+
 try
 {
   SFTPDownloader downloader;
-  std::set<std::string> files = downloader.username("user")
-                                          .password("pass")
-                                          .url("sftp://server.com/remote/path/")
-                                          .list();
+  auto files = downloader.username("user")
+                         .password("pass")
+                         .url("sftp://server.com/remote/path/")
+                         .list();
 
-  // 파일 존재 여부
-  downloader.url("sftp://server.com/remote/path/file.txt");
-  bool found = downloader.exists();
+  for (auto &file : files)
+    std::cout << file << std::endl;
 }
 catch (const SFTPCurlBase::exception &e)
 {
@@ -119,6 +136,10 @@ catch (const SFTPCurlBase::exception &e)
 
 ### 파일 존재 여부
 ```cpp
+#include <sftp_curl/sftp_curl.h>
+
+...........
+
 try
 {
   SFTPDownloader downloader;
@@ -135,6 +156,10 @@ catch (const SFTPCurlBase::exception &e)
 ### 타임아웃 설정
 
 ```cpp
+#include <sftp_curl/sftp_curl.h>
+
+...........
+
 try
 {
   SFTPUploader uploader;
