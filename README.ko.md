@@ -144,8 +144,7 @@ try
 {
   SFTPDownloader downloader;
   // 파일 존재 여부
-  downloader.url("sftp://server.com/remote/path/file.txt");
-  bool found = downloader.exists();
+  bool found = downloader.url("sftp://server.com/remote/path/file.txt").exists();
 }
 catch (const SFTPCurlBase::exception &e)
 {
